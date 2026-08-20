@@ -12,3 +12,29 @@ A full-stack web application that acts as a central catalogue for company dashbo
 - manage all dashboard metadata in one place 
 
 the system does not host real dashboards. It only stores information about them.
+
+# Technologies used 
+## Frontend 
+- HTML
+- CSS
+- JavaScript
+## Backend 
+- Python
+- Flask-CORS
+## Database 
+- MySQl
+## Tools
+- VS Code
+- Live Server
+- MySQL Workbench
+
+# Features 
+User can:
+- Add dashboards
+- View dashoards
+- Edit dashboards
+- Delete dashboards
+- Search dashboards
+- Filter dashboards
+- Open dashboards URLs
+- Link dashboards to data sources 
