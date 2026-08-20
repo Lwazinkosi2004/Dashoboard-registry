@@ -29,6 +29,7 @@ the system does not host real dashboards. It only stores information about them.
 - MySQL Workbench
 
 # Features 
+## Dashboards
 User can:
 - Add dashboards
 - View dashoards
@@ -38,3 +39,17 @@ User can:
 - Filter dashboards
 - Open dashboards URLs
 - Link dashboards to data sources 
+## Dashboard fields 
+- Name
+- Description
+- URL
+- Category
+- Owner name
+- Status
+
+# Data Sources 
+Users can:
+- Add data sources
+- View data sources
+- Edit data sources
+- Delete data sources 
