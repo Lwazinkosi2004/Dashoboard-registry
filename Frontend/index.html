@@ -97,7 +97,12 @@
             </div>
 
             <input id="dataSourceName" class="form-control mb-2" type="text" placeholder="Data source name">
-            <input id="dataSourceType" class="form-control mb-2" type="text" placeholder="Type">
+            <select id="dataSourceType" class="form-select mb-2">
+                <option value="" disabled selected>Select type</option>
+                <option value="Database">Database</option>
+                <option value="File">File</option>
+                <option value="API">API</option>
+            </select>
             <textarea id="dataSourceDescription" class="form-control mb-3" placeholder="Description"></textarea>
 
             <div class="d-flex justify-content-end gap-2">
