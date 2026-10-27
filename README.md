@@ -52,4 +52,21 @@ Users can:
 - Add data sources
 - View data sources
 - Edit data sources
-- Delete data sources 
+- Delete data sources
+
+# Data Source Fields
+- Name
+- Type
+- Description
+
+## Dashboard - Data Source Linking 
+- One dashboard can use many data sources
+- one data source can be linked to many dashboards
+This implemented using a many-to-many relationship table
+
+
+## Database design 
+# Tables
+# Dashboard 
+
+|# Coloumn| # Type|
