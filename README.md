@@ -69,4 +69,4 @@ This implemented using a many-to-many relationship table
 # Tables
 # Dashboard 
 
-|# Coloumn| # Type|
+|Coloumn|Type|
