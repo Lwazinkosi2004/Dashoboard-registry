@@ -197,6 +197,11 @@ cursor = db.cursor(dictionary=True)
    Backend runs on:
    http://127.0.0.1:5000
 
+  run this code in Powershell terminal:
+  
+  Set-Location "Dashoboard registry\Backend"
+  python app.py
+
 # 6. Run Frontend
 - Install VS Code Live Server extension
 
