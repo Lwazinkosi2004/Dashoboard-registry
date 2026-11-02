@@ -32,6 +32,24 @@ def get_dashboards():
         return jsonify(cursor.fetchall())
 
 
+@app.route("/api/dashboards/<int:dashboard_id>", methods=["GET"])
+def get_dashboard(dashboard_id):
+    with db.cursor() as cursor:
+        cursor.execute("SELECT * FROM dashboards WHERE id = %s", (dashboard_id,))
+        dashboard = cursor.fetchone()
+        if dashboard is None:
+            return jsonify({"error": "Dashboard not found"}), 404
+
+        cursor.execute(
+            "SELECT data_source_id FROM dashboard_data_sources WHERE dashboard_id = %s",
+            (dashboard_id,),
+        )
+        dashboard["data_source_ids"] = [
+            row["data_source_id"] for row in cursor.fetchall()
+        ]
+    return jsonify(dashboard)
+
+
 @app.route("/api/dashboards", methods=["POST"])
 def create_dashboard():
     data = request.get_json(silent=True)
@@ -88,17 +106,45 @@ def update_dashboard(dashboard_id):
     if not isinstance(data, dict) or any(field not in data for field in fields):
         return jsonify({"error": "Dashboard details are required"}), 400
 
-    with db.cursor() as cursor:
-        cursor.execute(
-            """
-            UPDATE dashboards
-            SET name = %s, description = %s, url = %s, category = %s,
-                owner_name = %s, status = %s
-            WHERE id = %s
-            """,
-            tuple(data[field] for field in fields) + (dashboard_id,),
-        )
-    db.commit()
+    source_ids = data.get("data_source_ids", [])
+    if not isinstance(source_ids, list) or any(type(source_id) is not int for source_id in source_ids):
+        return jsonify({"error": "data_source_ids must be a list of integers"}), 400
+
+    committed = False
+    try:
+        with db.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE dashboards
+                SET name = %s, description = %s, url = %s, category = %s,
+                    owner_name = %s, status = %s
+                WHERE id = %s
+                """,
+                tuple(data[field] for field in fields) + (dashboard_id,),
+            )
+            if cursor.rowcount == 0:
+                cursor.execute("SELECT id FROM dashboards WHERE id = %s", (dashboard_id,))
+                if cursor.fetchone() is None:
+                    return jsonify({"error": "Dashboard not found"}), 404
+
+            cursor.execute(
+                "DELETE FROM dashboard_data_sources WHERE dashboard_id = %s",
+                (dashboard_id,),
+            )
+            for source_id in source_ids:
+                cursor.execute(
+                    """
+                    INSERT INTO dashboard_data_sources
+                        (dashboard_id, data_source_id)
+                    VALUES (%s, %s)
+                    """,
+                    (dashboard_id, source_id),
+                )
+        db.commit()
+        committed = True
+    finally:
+        if not committed:
+            db.rollback()
     return jsonify({"message": "Dashboard updated"})
 
 
@@ -109,13 +155,27 @@ def get_data_sources():
         return jsonify(cursor.fetchall())
 
 
+@app.route("/api/data_sources/<int:source_id>", methods=["GET"])
+def get_data_source(source_id):
+    with db.cursor() as cursor:
+        cursor.execute("SELECT * FROM data_sources WHERE id = %s", (source_id,))
+        source = cursor.fetchone()
+    if source is None:
+        return jsonify({"error": "Data source not found"}), 404
+    return jsonify(source)
+
+
 @app.route("/api/data_sources", methods=["POST"])
 def create_data_source():
     data = request.get_json(silent=True)
     fields = ("name", "type", "description")
     if not isinstance(data, dict) or any(field not in data for field in fields):
         return jsonify({"error": "Data source details are required"}), 400
-    if data["type"] not in ("Database", "File", "API"):
+    if not isinstance(data["type"], str) or data["type"].casefold() not in {
+        "database",
+        "file",
+        "api",
+    }:
         return jsonify({"error": "type must be Database, File, or API"}), 400
 
     with db.cursor() as cursor:
@@ -144,7 +204,11 @@ def update_data_source(source_id):
     fields = ("name", "type", "description")
     if not isinstance(data, dict) or any(field not in data for field in fields):
         return jsonify({"error": "Data source details are required"}), 400
-    if data["type"] not in ("Database", "File", "API"):
+    if not isinstance(data["type"], str) or data["type"].casefold() not in {
+        "database",
+        "file",
+        "api",
+    }:
         return jsonify({"error": "type must be Database, File, or API"}), 400
 
     with db.cursor() as cursor:
